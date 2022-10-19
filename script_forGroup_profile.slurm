@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH --job-name=qcut1
+#SBATCH --job-name=pro2
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=56
 #SBATCH --time=3-00:00:00
@@ -12,10 +12,10 @@
 . /etc/profile
 source $HOME/.bashrc
 
-##cd /mnt/projects/lensing/HALO_SHAPE/MICEv1.0/codes_HS_micev1.0/
+cd /mnt/projects/lensing/HALO_SHAPE/MICEv1.0/codes_HS_micev1.0/
 
 export OMP_NUM_THREADS=$SLURM_CPUS_PER_TASK
 export MKL_NUM_THREADS=$SLURM_CPUS_PER_TASK
 
 conda activate myenv
-srun python -u forGroup_qprofile.py -sample 'CMB_check2' -lM_min 14.5 -lM_max 14.7 -z_min 0.4 -z_max 0.45 -ncores 32 -RIN 500 -ROUT 80000 -nbins 60
+srun python -u forGroup_qprofile.py -sample 'CMB_test' -lM_min 14.7 -lM_max 14.9 -z_min 0.4 -z_max 0.45 -ncores 56 -RIN 500 -ROUT 80000 -nbins 60 -relax True
