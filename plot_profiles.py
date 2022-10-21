@@ -31,7 +31,7 @@ Msun = M_sun.value # Solar mass (kg)
 pro = fits.open('../Kappa_Submuestra1_5deg.fits')[1].data
 
 pro2t = fits.open('../KappaProyectado_Submuestra1_Tesis.fits')[1].data
-p3 = fits.open('../profile_CMB_test.fits')[1].data
+p3 = fits.open('../profile_CMB_parper.fits')[1].data
 
 
 theta = pro['Radio']
@@ -75,10 +75,10 @@ c200 = 3.5
 mr  = r2t < 50.
 mr2 = r < 50.
 
-s2      = S2_quadrupole(r2t[mr],zl,M200 = 10**logM,c200=c200,cosmo_params=params,terms='1h')
-s2_2h   = S2_quadrupole(r2t[mr],zl,M200 = 10**logM,c200=c200,cosmo_params=params,terms='2h')
-s       = Sigma_NFW_2h(r[mr2],zl,M200 = 10**logM,c200=c200,cosmo_params=params,terms='1h')
-s_2h    = Sigma_NFW_2h(r[mr2],zl,M200 = 10**logM,c200=c200,cosmo_params=params,terms='2h')
+# s2      = S2_quadrupole(r2t[mr],zl,M200 = 10**logM,c200=c200,cosmo_params=params,terms='1h')
+# s2_2h   = S2_quadrupole(r2t[mr],zl,M200 = 10**logM,c200=c200,cosmo_params=params,terms='2h')
+# s       = Sigma_NFW_2h(r[mr2],zl,M200 = 10**logM,c200=c200,cosmo_params=params,terms='1h')
+# s_2h    = Sigma_NFW_2h(r[mr2],zl,M200 = 10**logM,c200=c200,cosmo_params=params,terms='2h')
 
 plt.figure()
 plt.xlabel(r'$R [Mpc/h]$')
@@ -88,7 +88,7 @@ plt.plot(r2t,Sigma2t)
 plt.plot(r2t[mr],0.2*s2,'C1',label='S2 - 1halo - e=0.2')
 plt.plot(r2t[mr],0.4*s2_2h,'C1--',label='S2 - 2halo - e=0.4')
 plt.plot(r2t[mr],0.2*s2+0.4*s2_2h,'C3',label='S2 - 1h + 2h')
-plt.plot(p3.Rp,p3.KAPPA_Tcos,'k',label='MICE')
+plt.plot(p3.Rp,p3.SIGMA_cos,'k',label='MICE')
 plt.axis([0,50,-1,10])
 plt.legend()
 plt.savefig('../profile_S2.png',bbox_inches='tight')
@@ -102,10 +102,12 @@ plt.plot(r,Sigma,'C0',label='radial')
 plt.plot(r,Sigma_par,'C0--',label='paralelo')
 plt.plot(r,Sigma_per,'C0:',label='perpendicular')
 plt.loglog()
-plt.plot(r[mr2],s,'C1',label='S2 - 1halo')
+# plt.plot(r[mr2],s,'C1',label='S2 - 1halo')
 plt.plot(r[mr2],s_2h,'C1--',label='S2 - 2halo')
-plt.plot(r[mr2],s+s_2h,'C3',label='S2 - 1halo + 2halo')
+# plt.plot(r[mr2],s+s_2h,'C3',label='S2 - 1halo + 2halo')
 plt.plot(p3.Rp,p3.Sigma,'k',label='MICE')
+plt.plot(p3.Rp,p3.SIGMA_par,'k--',label='MICE - par')
+plt.plot(p3.Rp,p3.SIGMA_per,'k:',label='MICE - per')
 plt.legend()
 plt.savefig('../profile_S.png',bbox_inches='tight')
 
