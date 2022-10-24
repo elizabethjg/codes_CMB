@@ -31,7 +31,13 @@ Msun = M_sun.value # Solar mass (kg)
 pro = fits.open('../Kappa_Submuestra1_5deg.fits')[1].data
 
 pro2t = fits.open('../KappaProyectado_Submuestra1_Tesis.fits')[1].data
-p3 = fits.open('../profile_CMB_parper.fits')[1].data
+
+
+p_mice = fits.open('../profile_CMB_test2.fits')[1].data
+cov    = fits.open('../profile_CMB_test2.fits')[2].data
+
+CovS      = np.sqrt(np.diag(cov.COV_S.reshape(len(p_mice),len(p_mice))))
+CovS_cos  = np.sqrt(np.diag(cov.COV_Scos.reshape(len(p_mice),len(p_mice))))
 
 
 theta = pro['Radio']
@@ -69,26 +75,27 @@ r2t      = (theta2t*60.*KPCSCALE)/1.e3
 
 folder    = '../'
 
-logM = 14.7
-c200 = 3.5
+logM = 14.55
+c200 = concentration.concentration(10**logM, '200c', zl, model = 'diemer19')
 
 mr  = r2t < 50.
 mr2 = r < 50.
 
-# s2      = S2_quadrupole(r2t[mr],zl,M200 = 10**logM,c200=c200,cosmo_params=params,terms='1h')
-# s2_2h   = S2_quadrupole(r2t[mr],zl,M200 = 10**logM,c200=c200,cosmo_params=params,terms='2h')
-# s       = Sigma_NFW_2h(r[mr2],zl,M200 = 10**logM,c200=c200,cosmo_params=params,terms='1h')
-# s_2h    = Sigma_NFW_2h(r[mr2],zl,M200 = 10**logM,c200=c200,cosmo_params=params,terms='2h')
+s2      = S2_quadrupole(p_mice.Rp[:-3],zl,M200 = 10**logM,c200=c200,cosmo_params=params,terms='1h',pname='Einasto')
+s2_2h   = S2_quadrupole(p_mice.Rp[:-3],zl,M200 = 10**logM,c200=c200,cosmo_params=params,terms='2h',pname='Einasto')
+s       = Sigma_Ein_2h(p_mice.Rp[:-3],zl,M200 = 10**logM,c200=c200,alpha=0.3,cosmo_params=params,terms='1h')
+s_2h    = Sigma_Ein_2h(p_mice.Rp[:-3],zl,M200 = 10**logM,c200=c200,alpha=0.3,cosmo_params=params,terms='2h')
 
 plt.figure()
 plt.xlabel(r'$R [Mpc/h]$')
-plt.ylabel(r'$e \times \Sigma \cos(2\alpha) [M_{\odot}pc^{-2} h ]$')
+plt.ylabel(r'$e \times \Sigma_2 [M_{\odot}pc^{-2} h ]$')
 plt.savefig('../profile_S2.png',bbox_inches='tight')
-plt.plot(r2t,Sigma2t)
-plt.plot(r2t[mr],0.2*s2,'C1',label='S2 - 1halo - e=0.2')
-plt.plot(r2t[mr],0.4*s2_2h,'C1--',label='S2 - 2halo - e=0.4')
-plt.plot(r2t[mr],0.2*s2+0.4*s2_2h,'C3',label='S2 - 1h + 2h')
-plt.plot(p3.Rp,p3.SIGMA_cos,'k',label='MICE')
+plt.plot(r2t,Sigma2t,'C0',lw=3)
+plt.plot(p_mice.Rp[:-3],0.2*s2,'C1',label='S2 - 1halo - e=0.2')
+plt.plot(p_mice.Rp[:-3],0.4*s2_2h,'C1--',label='S2 - 2halo - e=0.4')
+plt.plot(p_mice.Rp[:-3],0.2*s2+0.4*s2_2h,'C3',label='S2 - 1h + 2h')
+plt.plot(p_mice.Rp,p_mice.SIGMA_cos,'k',label='MICE')
+plt.fill_between(p_mice.Rp,p_mice.SIGMA_cos+CovS_cos,p_mice.SIGMA_cos-CovS_cos,color='C7',alpha=0.4)
 plt.axis([0,50,-1,10])
 plt.legend()
 plt.savefig('../profile_S2.png',bbox_inches='tight')
@@ -98,17 +105,19 @@ plt.savefig('../profile_S2.png',bbox_inches='tight')
 plt.figure()
 plt.xlabel(r'$R [Mpc/h]$')
 plt.ylabel(r'$\Sigma [M_{\odot}pc^{-2} h ]$')
-plt.plot(r,Sigma,'C0',label='radial')
-plt.plot(r,Sigma_par,'C0--',label='paralelo')
-plt.plot(r,Sigma_per,'C0:',label='perpendicular')
+plt.plot(r,Sigma,'C0',label='radial',lw=3)
+plt.plot(r,Sigma_par,'C0--',label='paralelo',lw=3)
+plt.plot(r,Sigma_per,'C0:',label='perpendicular',lw=3)
+plt.axis([0.5,50,1,300])
 plt.loglog()
-# plt.plot(r[mr2],s,'C1',label='S2 - 1halo')
-plt.plot(r[mr2],s_2h,'C1--',label='S2 - 2halo')
-# plt.plot(r[mr2],s+s_2h,'C3',label='S2 - 1halo + 2halo')
-plt.plot(p3.Rp,p3.Sigma,'k',label='MICE')
-plt.plot(p3.Rp,p3.SIGMA_par,'k--',label='MICE - par')
-plt.plot(p3.Rp,p3.SIGMA_per,'k:',label='MICE - per')
-plt.legend()
+plt.plot(p_mice.Rp[:-3],s,'C1',label='S2 - 1halo')
+plt.plot(p_mice.Rp[:-3],s_2h,'C1--',label='S2 - 2halo')
+plt.plot(p_mice.Rp[:-3],s+s_2h,'C3',label='S2 - 1halo + 2halo')
+plt.plot(p_mice.Rp,p_mice.Sigma,'k',label='MICE')
+plt.plot(p_mice.Rp,p_mice.SIGMA_par,'k--',label='MICE - par')
+plt.plot(p_mice.Rp,p_mice.SIGMA_per,'k:',label='MICE - per')
+plt.fill_between(p_mice.Rp,p_mice.Sigma+CovS,p_mice.Sigma-CovS,color='C7',alpha=0.4)
+plt.legend(frameon=False)
 plt.savefig('../profile_S.png',bbox_inches='tight')
 
 
