@@ -29,8 +29,9 @@ Msun = M_sun.value # Solar mass (kg)
 
 
 pro = fits.open('../Kappa_Submuestra1_5deg.fits')[1].data
+pro2t = fits.open('../KappaProyectadoNormalizado.fits')[1].data
 
-pro2t = fits.open('../KappaProyectado_listpix.fits')[1].data
+# pro2t = fits.open('../KappaProyectado_listpix.fits')[1].data
 
 
 p_mice = fits.open('../profile_CMB_test2.fits')[1].data
@@ -60,7 +61,7 @@ dls = cosmo_ap.angular_diameter_distance_z1z2(zl, zs).value
 
 KPCSCALE   = dl*(((1.0/3600.0)*np.pi)/180.0)*1000.0
 
-BETA_array = dls/ds
+BETA_array = 1.0
 
 Dl = dl*1.e6*pc
 sigma_c = (((cvel**2.0)/(4.0*np.pi*G*Dl))*(1./BETA_array))*(pc**2/Msun)
@@ -81,16 +82,16 @@ c200 = concentration.concentration(10**logM, '200c', zl, model = 'diemer19')
 mr  = r2t < 50.
 mr2 = r < 50.
 
-# s2      = S2_quadrupole(p_mice.Rp[:-3],zl,M200 = 10**logM,c200=c200,cosmo_params=params,terms='1h',pname='Einasto')
-# s2_2h   = S2_quadrupole(p_mice.Rp[:-3],zl,M200 = 10**logM,c200=c200,cosmo_params=params,terms='2h',pname='Einasto')
-# s       = Sigma_Ein_2h(p_mice.Rp[:-3],zl,M200 = 10**logM,c200=c200,alpha=0.3,cosmo_params=params,terms='1h')
-# s_2h    = Sigma_Ein_2h(p_mice.Rp[:-3],zl,M200 = 10**logM,c200=c200,alpha=0.3,cosmo_params=params,terms='2h')
+s2      = S2_quadrupole(p_mice.Rp[:-3],zl,M200 = 10**logM,c200=c200,cosmo_params=params,terms='1h',pname='Einasto')
+s2_2h   = S2_quadrupole(p_mice.Rp[:-3],zl,M200 = 10**logM,c200=c200,cosmo_params=params,terms='2h',pname='Einasto')
+s       = Sigma_Ein_2h(p_mice.Rp[:-3],zl,M200 = 10**logM,c200=c200,alpha=0.3,cosmo_params=params,terms='1h')
+s_2h    = Sigma_Ein_2h(p_mice.Rp[:-3],zl,M200 = 10**logM,c200=c200,alpha=0.3,cosmo_params=params,terms='2h')
 
 plt.figure()
 plt.xlabel(r'$R [Mpc/h]$')
 plt.ylabel(r'$e \times \Sigma_2 [M_{\odot}pc^{-2} h ]$')
 plt.savefig('../profile_S2.png',bbox_inches='tight')
-plt.plot(r2t,-1*Sigma2t,'C0',lw=3)
+plt.plot(r2t,Sigma2t,'C0',lw=3)
 plt.plot(p_mice.Rp[:-3],0.2*s2,'C1',label='S2 - 1halo - e=0.2')
 plt.plot(p_mice.Rp[:-3],0.4*s2_2h,'C1--',label='S2 - 2halo - e=0.4')
 plt.plot(p_mice.Rp[:-3],0.2*s2+0.4*s2_2h,'C3',label='S2 - 1h + 2h')
@@ -99,6 +100,19 @@ plt.fill_between(p_mice.Rp,p_mice.SIGMA_cos+CovS_cos,p_mice.SIGMA_cos-CovS_cos,c
 plt.axis([0,50,-1,10])
 plt.legend()
 plt.savefig('../profile_S2.png',bbox_inches='tight')
+
+plt.figure()
+plt.xlabel(r'$R [Mpc/h]$')
+plt.ylabel(r'$e \times \kappa_2$')
+plt.plot(r2t,kappa2t,'C0',lw=3)
+plt.plot(p_mice.Rp[:-3],0.2*s2/sigma_c,'C1',label='S2 - 1halo - e=0.2')
+plt.plot(p_mice.Rp[:-3],0.4*s2_2h/sigma_c,'C1--',label='S2 - 2halo - e=0.4')
+plt.plot(p_mice.Rp[:-3],0.2*s2/sigma_c+0.4*s2_2h/sigma_c,'C3',label='S2 - 1h + 2h')
+plt.plot(p_mice.Rp,p_mice.SIGMA_cos/sigma_c,'k',label='MICE')
+plt.fill_between(p_mice.Rp,p_mice.SIGMA_cos/sigma_c+CovS_cos/sigma_c,p_mice.SIGMA_cos/sigma_c-CovS_cos/sigma_c,color='C7',alpha=0.4)
+plt.axis([0,50,-0.001,0.004])
+plt.legend()
+plt.savefig('../profile_kappa2.png',bbox_inches='tight')
 
 
 
